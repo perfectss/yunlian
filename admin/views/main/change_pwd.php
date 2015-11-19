@@ -1,7 +1,7 @@
 <!-- begin #page-container -->
 <div id="page-container" class="fade page-sidebar-fixed page-header-fixed">
-    <?php include_once('header.php');?>
-    <?php include_once('left.php');?>
+    <?php include_once('/../public/header.php');?>
+    <?php include_once('/../public/left.php');?>
     <!-- begin #content -->
     <div id="content" class="content">
         <!-- begin col-6 -->
