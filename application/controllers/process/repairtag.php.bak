@@ -1,0 +1,15 @@
+<?php
+class Repairtag extends CI_Controller{
+	function index(){
+		$this->load->model("comm_model","comm");
+		
+		$catids = $this->db->query("SELECT  `catid` FROM  `wl_tagindex` GROUP BY  `catid` ORDER BY  `catid`")->result_array();
+		dump(count($catids));
+		foreach($catids as $c){
+			$findcat = $this->comm->find("category",array("catid"=>$c['catid']));
+			if(!$findcat){
+				dump($c['catid']);
+			}
+		}
+	}
+}

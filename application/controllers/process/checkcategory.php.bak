@@ -1,0 +1,106 @@
+<?php
+class Checkcategory extends CI_Controller{
+	function sell(){
+		$this->load->model("comm_model","comm");
+		$catids = $this->db->query("SELECT  `catid` FROM  `wl_sell` GROUP BY  `catid` ORDER BY  `catid")->result_array();
+		foreach($catids as $v){
+			$rs = $this->comm->find("category",array("catid"=>$v['catid']));
+			if(!$rs){
+				dump($v['catid']);
+			}else{
+				dump("ok");
+			}
+		}
+	}
+	function repair_lastcat(){
+		$this->load->model("comm_model","comm");
+		$lastcat = $this->comm->findAll("category_bak2",array("child"=>0));
+		foreach($lastcat as $cat){
+			$this->comm->update("category_bak2",array("catid"=>$cat['catid']),array("arrchildid"=>$cat['catid']));
+			dump("repaired success".$cat['catname']);
+		}
+		
+	}
+	function vs(){
+		$this->load->model("comm_model","comm");
+		$categoryold = $this->comm->findAll("category_bak1","","catid asc");
+		foreach($categoryold as $v){
+			$rs = $this->comm->find("category_bak2",array("catid"=>$v['catid']));
+			if(!$rs){
+				dump($v);
+			}else{
+				//if($v['child']){
+					if($rs['parentid'] == $v['parentid'] and $rs['arrparentid'] == $v['arrparentid'] and $rs['child'] == $v['child'] and $rs['arrchildid'] == $v['arrchildid']){
+						//dump($v['arrchildid']);
+						//dump($rs['arrchildid']);
+					}else{
+						dump("no");
+						//$this->comm->update("category_bak1",array("catid"=>$v['catid']),array("arrchildid"=>$rs['arrchildid'],"parentid"=>$rs['parentid'],"arrparentid"=>$rs['arrparentid'],"child"=>$rs['child']));
+
+					}
+				//}
+				
+			}
+		}
+	}
+	
+	function child(){
+		$this->load->model("comm_model","comm");
+		$category = $this->comm->findAll("category","","catid asc");
+		foreach($category as $v){
+			dump($this->getpcatids(1649));
+			die();
+		}
+	}
+	
+	function getsubcatids($catid = null){
+		if(!$catid){
+			return false;
+		}
+		$thiscat = $this->comm->find("category",array("catid"=>$catid));
+		if(!$thiscat){
+			return false;
+		}
+		
+		if($thiscat['child']==0){
+			$thiscat['arrchildid'] = $thiscat['catid'];
+		}
+		
+		$subcats = $this->comm->findAll("category","parentid={$catid}","catid asc","catid");
+		$childids = array();
+		foreach($subcats as $subcat){
+			$rs = $this->getpcatids($subcat['catid'],$catid);
+			if($rs){
+				foreach($rs as $v){
+					if(!in_array($v,$childids,true)){
+						array_push($childids,$v);
+					}
+				}
+			}
+		}
+		return $childids;
+	}
+	
+	function getpcatids($catid = null, $topcid = 0, $pcats = array()){
+		if(!$catid){
+			return false;
+		}
+		if($catid == $topcid){
+			return array($catid);
+		}
+		$rs = $this->comm->find("category",array("catid"=>$catid),"","parentid,arrparentid");
+		if(!$rs){
+			return false;
+		}
+		$arrparentids = explode(",",$rs['arrparentid']);
+		if(!in_array($topcid,$arrparentids)){
+			return false;
+		}
+		array_unshift($pcats,$catid);
+		if($rs['parentid'] == $topcid){
+			array_unshift($pcats,$rs['parentid']);
+			return $pcats;
+		}
+		return $this->getpcatids($rs['parentid'],$topcid,$pcats);
+	}
+}

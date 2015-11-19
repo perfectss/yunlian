@@ -1,0 +1,32 @@
+<?php
+class subtitle extends CI_Controller{
+	function index(){
+		$this->load->model("comm_model","comm");
+		$page = $this->uri->rsegment(3,0);
+		$page = intval($page);
+		$perpage = 10000;
+		$start = $page * $perpage;
+		$rs = $this->db->query("select b.itemid,b.catid,b.subtitle,b.title from (select itemid from wl_sell order by itemid limit {$start},{$perpage}) a left join wl_sell b on a.itemid=b.itemid")->result_array();
+		foreach($rs as $v){
+			dump($v['itemid']);
+			$cat = $this->comm->find("category",array("catid"=>$v['catid']));
+			$arrparentid = explode(",",$cat['arrparentid']);
+			if(in_array(1104,$arrparentid)){
+				$linkurl=preg_replace("/[^a-zA-Z0-9]+/","-",$v['title']);
+			}else{
+				$linkurl=preg_replace("/[^a-zA-Z0-9]+/","-",$v['subtitle']);
+			}
+			
+			
+			if(strlen($linkurl)>255){
+				$linkurl = substr($linkurl,0,255);
+			}
+			$this->db->update("sell",array("linkurl"=>$linkurl),array("itemid"=>$v['itemid']));
+		}
+		$page = $page + 1;
+		if($start<4649321){
+			echo "<script>window.location.href='/process/subtitle/index/".$page."'</script>";
+		}
+		dump("success");
+	}
+}

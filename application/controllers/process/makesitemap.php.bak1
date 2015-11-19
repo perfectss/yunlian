@@ -1,0 +1,46 @@
+<?php
+if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+class Makesitemap extends CI_Controller {
+	function __construct(){
+		parent::__construct();
+		$this->load->model('comm_model','comm');
+	}
+	
+	
+	function item(){
+		ini_set("memory_limit","512M");
+		ini_set('max_execution_time',0);
+		$this->load->model("comm_model","comm");
+		
+		$page = $this->uri->rsegment(3,0);
+		$page = intval($page);
+		$perpage = 50000;
+		$start = $page * $perpage;
+		
+		$content="<?xml version=\"1.0\" encoding=\"UTF-8\"?>\r\n";
+		$content.="<urlset xmlns=\"http://www.sitemaps.org/schemas/sitemap/0.9\">\r\n";
+		
+		$rs = $this->db->query("select b.itemid,b.linkurl from (select itemid from wl_sell order by itemid limit {$start},{$perpage}) a left join wl_sell b on a.itemid=b.itemid")->result_array();
+		
+		foreach($rs as $k => $v){
+			$content.="	<url>\r\n";
+			$content.="		<loc>".site_url('sell_detail/index/'.$v['itemid'].'/'.$v['linkurl'])."</loc>\r\n";
+			$content.="		<lastmod>".date("Y-m-d")."</lastmod>\r\n";
+			$content.="		<changefreq>daily</changefreq>\r\n";
+			$content.="		<priority>0.6</priority>\r\n";
+			$content.="	</url>\r\n";
+		}
+		
+		$content.="</urlset>";
+		$fhandle=fopen("./sitemap/sitemap_".$page.".xml","w");
+		fwrite($fhandle,$content);
+		fclose($fhandle);
+		$page = $page + 1;
+		if($start<2210000){
+			echo "<script>window.location.href='/process/makesitemap/item/".$page."'</script>";
+		}
+		echo "succes ".$page;
+		
+	}
+
+}

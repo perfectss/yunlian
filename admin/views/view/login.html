@@ -1,0 +1,44 @@
+<include file="Public:header" />
+	<!-- begin #page-container -->
+	<div id="page-container" class="fade">
+	    <!-- begin login -->
+        <div class="login bg-black animated fadeInDown">
+            <!-- begin brand -->
+            <div class="login-header">
+                <div class="brand">
+                    <span class="logo"></span> 期待你的加入
+                    <small>人生是需要等待的</small>
+                </div>
+                <div class="icon">
+                    <i class="fa fa-sign-in"></i>
+                </div>
+            </div>
+            <!-- end brand -->
+            <div class="login-content">
+                <form action="/home/index/login" method="POST" class="margin-bottom-0">
+                    <div class="form-group m-b-20">
+                        <input type="email" name="username" class="form-control input-lg" id="exampleInputEmail2" placeholder="电子邮件地址" />
+                    </div>
+                    <div class="form-group m-b-20">
+                        <input type="password" name="password" class="form-control input-lg" placeholder="密码" />
+                    </div>
+                    <div class="checkbox m-b-20">
+                        <label>
+                            <input type="checkbox" name="checkbox"/> 记住我
+                        </label>
+                    </div>
+                    <div class="login-buttons">
+                        <button type="submit" class="btn btn-success btn-block btn-lg">登陆</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+        <!-- end login -->
+	</div>
+	<!-- end page container -->
+<include file="Public:footer" />
+	<script>
+		$(document).ready(function() {
+			App.init();
+		});
+	</script>

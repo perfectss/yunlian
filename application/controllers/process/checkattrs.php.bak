@@ -1,0 +1,49 @@
+<?php
+class Checkattrs extends CI_Controller{
+	function index(){
+		$this->load->model("comm_model","comm");
+		$category = $this->comm->findAll("category",array("parentid"=>0),"catid asc");
+		foreach($category as $v){
+			$options = $this->comm->findAll("category_option","catid = {$v['catid']} and required =2","oid asc");
+			dump($options);
+			if($options){
+				foreach($options as $o){
+					//$this->comm->update("category_option",array("oid"=>$o['oid']),array("required"=>0));
+					$dvalues = $this->comm->findAll("category_option_value","oid = {$o['oid']}");
+					dump($dvalues);
+					foreach($dvalues as $ov){
+						//$this->comm->update("category_option_value",array("id"=>$ov['id']),array("catid"=>$v['catid']));
+						//$this->comm->delete("category_option_value",array("id"=>$ov['id']));
+					}
+				}
+			}else{
+				dump($v);
+			}
+			
+			
+		}
+	}
+	
+	function attrtag(){
+		$this->load->model("comm_model","comm");
+		$category = $this->comm->findAll("category",array("parentid"=>0),"catid asc");
+		foreach($category as $cat){
+			$attrtag = $this->comm->findAll("attrtag","catid = {$cat['catid']}","id asc");
+			
+			if(!$attrtag){
+				dump($cat);
+			}else{
+				dump($attrtag);
+				foreach($attrtag as $v){
+					$catname = $cat['catname'];
+					$attrs = str_replace(array("_","-"),array(",","|"),$v['linkurl']);
+					$num = count(explode(",",$attrs));
+					$this->comm->update("attrtag",array("id"=>$v['id']),array("attrs"=>$attrs,"catname"=>$catname,"num"=>$num));
+				}
+			}
+			
+		}
+		
+		
+	}
+}

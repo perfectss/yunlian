@@ -1,0 +1,90 @@
+<?php
+class subtitle extends CI_Controller{
+	function index(){
+		$page = $this->uri->rsegment(3,0);
+		$page = intval($page);
+		$perpage = 1000;
+		$start = $page * $perpage;
+		$rs = $this->db->query("select b.itemid,b.title from (select itemid from wl_sell order by itemid limit {$start},{$perpage}) a left join wl_sell b on a.itemid=b.itemid")->result_array();
+		foreach($rs as $v){
+			dump($subtitle);
+			$subtitle = trim($this->changeTitle($v['itemid']));
+			$this->db->update("sell",array("subtitle"=>$subtitle),array("itemid"=>$v['itemid']));
+		}
+		$page = $page + 1;
+		if($start<1050000){
+			echo "<script>window.location.href='/process/subtitle/index/".$page."'</script>";
+		}
+		dump("success");
+	}
+	
+	function changeTitle($itemid){
+		$this->load->model("comm_model","comm");
+		$findsell = $this->comm->find("sell",array("itemid"=>$itemid));
+		if(!$findsell){
+			return "";
+		}
+		
+		$category = $this->comm->find("category",array("catid"=>$findsell['catid']));
+		$catname = $category['catname'];
+		$avalue = $this->comm->findAll("category_value",array("itemid"=>$itemid));
+		$attr = array();
+		foreach($avalue as $a){
+			$option = $this->comm->find("category_option",array("oid"=>$a['oid']));
+			$attr[$a['oid']]['name'] = $option['name'];
+			$attr[$a['oid']]['value'] = $a['value'];
+		}
+		
+		$attr1 = array();
+		foreach ($attr as $kk => $vv) {
+			//Voltage
+			if (!$attr1['Voltage']) {
+				$attr1['Voltage'] =  stristr($vv['name'], 'Voltage') ? $vv['value'] : '';
+			}
+			//Power
+			if (!$attr1['Power']) {
+				$attr1['Power'] =  stristr($vv['name'], 'Power') ? $vv['value'] : '' ;
+			}
+
+			//Speed
+			if (!$attr1['Speed']) {
+				$attr1['Speed'] = stristr($vv['name'], 'Speed') ? $vv['value'] : '' ;
+			}
+
+			//Usage
+			if (!$attr1['Usage']) {
+				$attr1['Usage'] =  stristr($vv['name'], 'Usage') ? $vv['value'] : '' ;
+			}
+			
+			//Type
+			if (!$attr1['Type']) {
+				$attr1['Type'] =  stristr($vv['name'], 'Type') ? $vv['value'] : '';
+			}
+
+		}
+		$usage = $attr1['Usage'];
+		$type = $attr1['Type'];
+        unset($attr1['Usage']);
+		unset($attr1['Type']);
+		$attrTitle = '';
+		foreach($attr1 as $av){
+			$attrTitle .= $av." ";
+		}
+		
+		if($type){
+            $attrTitle.=" ".$type." (".$catname.") ";
+        }else{
+            $attrTitle .=" ".$catname." ";
+        }
+
+
+		if($usage){
+			$attrTitle .= "for ".$usage."";
+		}
+		if(strlen($attrTitle)>255){
+			$attrTitle = substr($attrTitle,0,255);
+		}
+		
+		return $attrTitle;
+	}
+}
